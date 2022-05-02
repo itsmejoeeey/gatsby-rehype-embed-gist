@@ -3,7 +3,17 @@ import querystring from "querystring";
 import cheerio from "cheerio";
 import parse from "parse-numeric-range";
 import fetch from "node-fetch";
-import visit from "async-unist-util-visit";
+import visit from "unist-util-visit-parents";
+
+const nodeToString = require("hast-util-to-string");
+const Rehype = require("rehype");
+
+const rehypeDefaults = {
+  fragment: true,
+  space: "html",
+  emitParseErrors: false,
+  verbose: false
+};
 
 // default base url
 const baseUrl = "https://gist.github.com";
@@ -148,59 +158,74 @@ function buildUrl(value, options, file) {
  * @param {PluginOptions} options the options of the plugin.
  * @returns {*} the markdown ast.
  */
-export default async ({ markdownAST }, options = {}) => {
+export default async ({ htmlAst }, options = {}) => {
   // this returns a promise that will fulfill immediately for everything
   // that is not an inlineCode that starts with `gist:`
-  return await visit(markdownAST, "inlineCode", async (node) => {
+  const rehype = new Rehype().data("settings", rehypeDefaults);
+
+  let matches = [];
+  visit(htmlAst, { tagName: "code" }, async (node, ancestors) => {
     // validate pre-requisites.
+    node.value = nodeToString(node);
     if (!node.value.startsWith("gist:")) return;
 
-    // get the query string and build the url
-    const query = getQuery(node.value.substring(5));
-    const url = buildUrl(node.value.substring(5), options, query.file);
-
-    // call the gist and update the node type and value
-    const response = await fetch(url);
-    const content = await response.json();
-
-    let html = content.div;
-    const hasLines = query.lines.length > 0;
-    const hasHighlights = query.highlights.length > 0;
-
-    if (hasHighlights || hasLines) {
-      const $ = cheerio.load(html);
-      const file = query.file
-        ? query.file
-            .replace(/^\./, "")
-            .replace(/[^a-zA-Z0-9_]+/g, "-")
-            .toLowerCase()
-        : "";
-
-      // highlight the specify lines, if any
-      if (hasHighlights) {
-        query.highlights.forEach((line) => {
-          $(`#file-${file}-LC${line}`).addClass("highlighted");
-        });
-      }
-
-      // remove the specific lines, if any
-      if (hasLines) {
-        const codeLines = parse(`1-${$("table tr").length}`);
-        codeLines.forEach((line) => {
-          if (query.lines.includes(line)) return;
-
-          $(`#file-${file}-LC${line}`).parent().remove();
-        });
-      }
-
-      html = $.html();
-    }
-
-    node = Object.assign(node, {
-      type: "html",
-      value: html.trim()
-    });
-
-    return markdownAST;
+    matches.push({ node, ancestors });
   });
+
+  return await Promise.all(
+    matches.map(async (match) => {
+      const node = match.node;
+      let parent = match.ancestors.at(-1);
+
+      // get the query string and build the url
+      const query = getQuery(node.value.substring(5));
+      const url = buildUrl(node.value.substring(5), options, query.file);
+
+      // call the gist and update the node type and value
+      const response = await fetch(url);
+      const content = await response.json();
+
+      let html = content.div;
+      const hasLines = query.lines.length > 0;
+      const hasHighlights = query.highlights.length > 0;
+
+      if (hasHighlights || hasLines) {
+        const $ = cheerio.load(html);
+        const file = query.file
+          ? query.file
+              .replace(/^\./, "")
+              .replace(/[^a-zA-Z0-9_]+/g, "-")
+              .toLowerCase()
+          : "";
+
+        // highlight the specify lines, if any
+        if (hasHighlights) {
+          query.highlights.forEach((line) => {
+            $(`#file-${file}-LC${line}`).addClass("highlighted");
+          });
+        }
+
+        // remove the specific lines, if any
+        if (hasLines) {
+          const codeLines = parse(`1-${$("table tr").length}`);
+          codeLines.forEach((line) => {
+            if (query.lines.includes(line)) return;
+
+            $(`#file-${file}-LC${line}`).parent().remove();
+          });
+        }
+
+        html = $.html();
+      }
+
+      const codeAst = rehype.parse(html);
+      parent = Object.assign(parent, {
+        tagName: codeAst.children[0].tagName,
+        properties: codeAst.children[0].properties,
+        children: codeAst.children[0].children
+      });
+
+      return codeAst;
+    })
+  );
 };

@@ -1,26 +1,26 @@
 {
   "license": "MIT",
   "version": "1.2.1",
-  "name": "gatsby-remark-embed-gist",
-  "description": "Gatsby remark gists preprocessor",
+  "name": "gatsby-rehype-embed-gist",
+  "description": "Gatsby rehype gists preprocessor",
   "author": {
-    "name": "Patricio Trevino",
-    "email": "patricio@weirdpattern.com"
+    "name": "Joey Miller",
+    "email": "maintainer@joeeey.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/weirdpattern/gatsby-remark-embed-gist"
+    "url": "https://github.com/itsmejoeeey/gatsby-rehype-embed-gist"
   },
   "bugs": {
-    "url": "https://github.com/weirdpattern/gatsby-remark-embed-gist/issues"
+    "url": "https://github.com/itsmejoeeey/gatsby-rehype-embed-gist/issues"
   },
   "main": "index.js",
   "keywords": [
     "gatsby",
     "gatsbyjs",
     "gatsby-plugin",
-    "gatsby-remark",
-    "remark",
+    "gatsby-rehype",
+    "rehype",
     "gist",
     "embedded",
     "plugin"
@@ -58,20 +58,21 @@
     "lint-staged": "^10.2.12",
     "prettier": "^2.1.0",
     "react": "^16.13.1",
-    "remark": "^12.0.1",
     "rimraf": "^3.0.2",
     "standard-version": "^9.0.0"
   },
   "dependencies": {
     "@babel/runtime": "^7.11.2",
-    "async-unist-util-visit": "^1.0.0",
     "cheerio": "^1.0.0-rc.3",
+    "hast-util-to-string": "^1.0.4",
+    "node-fetch": "^2.6.0",
     "parse-numeric-range": "^1.2.0",
-    "node-fetch": "^2.6.0"
+    "rehype": "^11.0.0",
+    "unist-util-visit-parents": "^3.1.1"
   },
   "peerDependencies": {
     "gatsby": "*",
-    "gatsby-transformer-remark": "*",
+    "gatsby-transformer-rehype": "*",
     "react": "*"
   },
   "husky": {

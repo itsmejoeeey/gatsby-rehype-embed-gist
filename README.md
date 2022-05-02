@@ -1,11 +1,11 @@
-# gatsby-remark-embed-gist
+# gatsby-rehype-embed-gist
 
-[![NPM badge](https://img.shields.io/npm/v/gatsby-remark-embed-gist.svg?style=flat-square)](https://www.npmjs.com/package/gatsby-remark-embed-gist)
-[![Travis badge](https://img.shields.io/travis/weirdpattern/gatsby-remark-embed-gist.svg?branch=master&style=flat-square)](https://travis-ci.org/weirdpattern/gatsby-remark-embed-gist)
-[![codecov](https://codecov.io/gh/weirdpattern/gatsby-remark-embed-gist/branch/master/graph/badge.svg)](https://codecov.io/gh/weirdpattern/gatsby-remark-embed-gist)
+[![NPM badge](https://img.shields.io/npm/v/gatsby-rehype-embed-gist.svg?style=flat-square)](https://www.npmjs.com/package/gatsby-rehype-embed-gist)
 
 This plugin allows content authors to embed [Gist](https://gist.github.com/)
 snippets.
+
+This plugin is forked from [gatsby-remark-embed-gist](https://github.com/weirdpattern/gatsby-remark-embed-gist) for use with `rehype` instead of `remark`. This makes the plugin suitable for when using Gatsby as a custom front-end for a headless CMS such as Ghost.
 
 ## Getting started
 
@@ -40,18 +40,18 @@ Highlights and lines can be defined using:
 
 ## Installation
 
-`yarn add gatsby-remark-embed-gist`
+`yarn add gatsby-rehype-embed-gist`
 
 ## Usage
 
 ```javascript
 // In your gatsby-config.js
 {
-  resolve: "gatsby-transformer-remark",
+  resolve: "gatsby-transformer-rehype",
   options: {
     plugins: [
       {
-        resolve: "gatsby-remark-embed-gist",
+        resolve: "gatsby-rehype-embed-gist",
         options: {
           // Optional:
 
@@ -144,9 +144,9 @@ Into this...
 ## Notes
 
 The order of the plugins only matters when used in conjunction with
-`gatsby-remark-prismjs`, because this plugin transforms the inline code blocks,
-so add `gatsby-remark-embed-gist` somewhere above this plugin.
+`gatsby-rehype-prismjs`, because this plugin transforms the inline code blocks,
+so add `gatsby-rehype-embed-gist` somewhere above this plugin.
 
 ## License
 
-MIT, by Patricio Trevino
+MIT by Patricio Trevino, Joey Miller
